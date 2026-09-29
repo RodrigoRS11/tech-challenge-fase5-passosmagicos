@@ -131,6 +131,32 @@ Em substituição a análises genéricas, a exploração dos dados foi estrutura
 
 ---
 
+## 🛠️ Tratamento de Dados e Engenharia de Recursos
+
+Abaixo está o detalhamento das técnicas aplicadas para limpeza, imputação e preparação das variáveis antes da modelagem preditiva e da extração de *embeddings*:
+
+| Variável / Grupo | Diagnóstico de Nulidade / Inconsistência | Técnica de Tratamento Aplicada | Justificativa Técnica & Negocial |
+| :--- | :--- | :--- | :--- |
+| **Identificador do Aluno** *(RA, Nome)* | Registros sem identificação única ou linhas totalmente vazias. | Remoção de Linhas (`dropna`) | Sem a chave primária (RA), é impossível realizar o acompanhamento longitudinal do aluno ao longo dos anos. |
+| **Índice Global** *(INDE)* | Alunos sem a nota geral de desempenho no ano. | Remoção de Linhas (`dropna`) | O INDE é o indicador principal da Passos Mágicos; registros sem essa métrica não possuem validade analítica. |
+| **Idade** | Ausência parcial de registros e inconsistência de formato entre os anos. | Imputação Temporal por RA + Mediana da Fase | Propaga-se a idade individual somando a variação dos anos ($Idade_{t} = Idade_{t-1} + 1$). Para cadastros novos, aplica-se a mediana da mesma Fase escolar. |
+| **Indicadores Quantitativos** *(IDA, IEG, IAA, IPS, IPV, IAN)* | Ausência pontual de avaliações em determinados ciclos anuais. | Imputação Multinível (Histórico por RA + Mediana por Fase/Ano) | Preserva o histórico individual via *Forward/Backward Fill*. Para alunos sem histórico, utiliza-se a mediana da mesma Fase no ano para evitar distorções. |
+| **Indicador Psicopedagógico** *(IPP)* | 100% nulo em 2022 (indicador introduzido apenas a partir de 2023). | Imputação por Mediana da Fase | Preenche os dados históricos com a mediana da Fase do aluno em anos subsequentes, permitindo que os algoritmos operem com a matriz completa. |
+| **Notas Acadêmicas** *(Mat, Por, Ing)* | Formatação como texto, presença de vírgulas e células vazias. | Conversão Numérica (`float`) + Mediana da Fase | Padronização dos decimais (substituição de `,` por `.`) e preenchimento dos nulos com a mediana da turma/fase equivalente. |
+| **Colunas Categóricas** *(Destaque IEG, Destaque IDA, Indicado, etc.)* | Valores ausentes em alunos que não receberam menções honrosas no ciclo. | Preenchimento Categórico (`fillna('Não')`) | O valor nulo indica a ausência do evento (aluno não destacado/indicado), sendo semanticamente correto categorizá-lo como `'Não'`. |
+| **Recomendações em Texto** *(Rec Psicologia)* | Ausência de parecer registrado pelo psicólogo/pedagogo no período. | Preenchimento Padrão (`fillna('Sem recomendação registrada')`) | Substituição dos `NaN` por texto neutro para manter a consistência do vetor na extração de *embeddings*. |
+
+---
+
+### 🧠 Tratamento para Embeddings de Texto (`Rec Psicologia`)
+
+Para permitir a vetorização de dados não estruturados e viabilizar o uso do campo **Recomendações em Texto** no modelo:
+
+1. **Tratamento de Nulos:** Os pareceres em branco foram preenchidos com o texto padrão `'Sem recomendação registrada'`.
+2. **Preservação Semântica:** A padronização com uma *string* neutra garante que o modelo de *embedding* atribua um vetor contínuo consistente aos casos sem registro, evitando a perda de linhas no dataset e mantendo a matriz de entradas completa para a modelagem.
+
+---
+
 ### 📊 Modelo Escolhido
 O **Random Forest Classifier** foi selecionado para a predição da probabilidade de risco dos alunos pelas seguintes razões:
 
