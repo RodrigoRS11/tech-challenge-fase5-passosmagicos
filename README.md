@@ -13,7 +13,7 @@
 # 📊 Associação Passos Mágicos — Efetividade Socioeducacional e Preditivo de Risco
 ## 🔗 Links do Projeto
 
-* 🌐 **Aplicação Interativa (Streamlit):** [Clique aqui para acessar a aplicação na nuvem]([https://seu-link-no-streamlit.streamlit.app/](https://tech-challenge-fase5-paappsmagicos-ehstbfxmsg5zbmsjc3hwdd.streamlit.app/Previsao_de_Risco))
+* 🌐 **Aplicação Interativa (Streamlit):** [Clique aqui para acessar a aplicação na nuvem](https://tech-challenge-fase5-paappsmagicos-ehstbfxmsg5zbmsjc3hwdd.streamlit.app/)
 
 ## 📖 Descrição
 
